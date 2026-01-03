@@ -1,7 +1,7 @@
 // --- CONFIGURATION ---
 // Bu adresi backend'ini internete (Render, PythonAnywhere vb.) yüklediğinde aldığın link ile değiştir.
 // Örn: 'https://senin-uygulaman.onrender.com'
-export const APP_BACKEND_URL = 'http://192.168.1.75:5000'; 
+export const APP_BACKEND_URL = 'https://heavy-crabs-live.loca.lt'; 
 
 import { Product, User, Order, OrderStatus, CartItem } from '../types';
 
