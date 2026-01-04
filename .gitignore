@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+.venv
+.gradle
+.gradle_temp
+.gradle_clean
+.idea
+*.apk
+bin/
+mobil_market.db
+product_images/
