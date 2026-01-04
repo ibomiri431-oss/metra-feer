@@ -1,58 +1,63 @@
 import os
+import sys
 import subprocess
-import shutil
+import time
 
-print("=" * 50)
-print("🚀 OTOMATİK APK OLUŞTURUCU BAŞLADI")
-print("=" * 50)
+def print_box(text):
+    print("\n" + "=" * 60)
+    print(f"🚀 {text}")
+    print("=" * 60)
 
-# Java ve Gradle ayarları
-os.environ["JAVA_HOME"] = r"C:\Program Files\Java\jdk-17"
-os.environ["GRADLE_USER_HOME"] = os.path.join(os.getcwd(), ".gradle_clean")
+def install_requirements():
+    print_box("GEREKSİNİMLER KONTROL EDİLİYOR...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+    print("✅ Gereksinimler hazır.")
 
-def run_cmd(cmd, cwd=None):
-    print(f"\n▶ {cmd}")
-    result = subprocess.run(cmd, shell=True, cwd=cwd)
-    if result.returncode != 0:
-        print(f"❌ Hata: {cmd}")
-        return False
-    return True
+def run_app_locally():
+    print_box("UYGULAMA MASAÜSTÜNDE BAŞLATILIYOR...")
+    print("ℹ️  Bu mod sadece tasarım testi içindir.")
+    print("ℹ️  Gerçek APK GitHub Actions üzerinden derlenecektir.")
+    subprocess.call([sys.executable, "main.py"])
 
-# 1. Web Build
-print("\n📦 Adım 1: Web kodları derleniyor...")
-if not run_cmd("npm run build"):
-    print("❌ Web build başarısız!")
-    input("Kapatmak için Enter...")
-    exit(1)
+def push_to_github():
+    print_box("GITHUB'A GÖNDERİLİYOR (APK DERLEMESİ İÇİN)...")
+    
+    # Git status verification
+    subprocess.call(["git", "add", "."])
+    commit_msg = f"Update for Kivy Build {int(time.time())}"
+    subprocess.call(["git", "commit", "-m", commit_msg])
+    
+    print("\nPushlanıyor...")
+    result = subprocess.call(["git", "push"])
+    
+    if result == 0:
+        print("\n✅ BAŞARILI! Kod GitHub'a gönderildi.")
+        print("🌍 GitHub Actions sekmesinden APK derlemesini takip edebilirsiniz.")
+    else:
+        print("\n❌ HATA: Git push işlemi başarısız oldu.")
 
-# 2. Capacitor Sync
-print("\n🔄 Adım 2: Android projesi güncelleniyor...")
-if not run_cmd("npx cap sync android"):
-    print("⚠ Sync hatası, android klasörü ekleniyor...")
-    run_cmd("npx cap add android")
-    run_cmd("npx cap sync android")
+def main():
+    while True:
+        print("\n" + "-"*30)
+        print("  MOBIL MARKET - KIVY MANAGER")
+        print("-"*30)
+        print("1. [TEST] Uygulamayı Windows'ta Çalıştır")
+        print("2. [BUILD] GitHub'a Gönder ve APK Oluştur")
+        print("3. [SETUP] Gereksinimleri Yükle (pip install)")
+        print("4. Çıkış")
+        
+        choice = input("\nSeçiminiz (1-4): ")
+        
+        if choice == '1':
+            run_app_locally()
+        elif choice == '2':
+            push_to_github()
+        elif choice == '3':
+            install_requirements()
+        elif choice == '4':
+            break
+        else:
+            print("Geçersiz seçim!")
 
-# 3. Gradle Build
-print("\n🔨 Adım 3: APK oluşturuluyor (Bu 2-3 dakika sürebilir)...")
-android_dir = os.path.join(os.getcwd(), "android")
-if not run_cmd("gradlew.bat assembleDebug --no-daemon --stacktrace", cwd=android_dir):
-    print("❌ APK oluşturulamadı!")
-    input("Kapatmak için Enter...")
-    exit(1)
-
-# 4. APK Kopyalama
-print("\n📲 Adım 4: APK dosyası kopyalanıyor...")
-source_apk = os.path.join(android_dir, "app", "build", "outputs", "apk", "debug", "app-debug.apk")
-target_apk = os.path.join(os.getcwd(), "MOBILE_MARKET.apk")
-
-if os.path.exists(source_apk):
-    shutil.copy(source_apk, target_apk)
-    print("\n" + "=" * 50)
-    print("✅ BAŞARILI! APK OLUŞTURULDU")
-    print("=" * 50)
-    print(f"\n📍 Dosya konumu:\n{target_apk}")
-    print("\nBu dosyayı telefonunuza göndererek kurabilirsiniz!")
-else:
-    print("❌ APK dosyası bulunamadı!")
-
-input("\n\nKapatmak için Enter'a basın...")
+if __name__ == "__main__":
+    main()
